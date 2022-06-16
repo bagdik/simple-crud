@@ -1,4 +1,6 @@
 import http from 'http';
+import 'dotenv/config';
+
 import { 
   getUsers, 
   getUser, 
