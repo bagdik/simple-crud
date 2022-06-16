@@ -1,5 +1,7 @@
-import users from '../data/users.js';
+import loadedUsers from '../data/users.js';
 import { v4 as uuidv4 } from 'uuid';
+
+let users = loadedUsers.slice(0);
 
 const findAll = () => {
   return new Promise((resolve, reject) => {
@@ -23,8 +25,25 @@ const create = (user) => {
   });
 }
 
+const update = (id, user) => {
+  return new Promise((resolve, reject) => {
+    const index = users.findIndex(u => u.id === id);
+    users[index] = { id, ...user };
+    resolve(users[index]);
+  });
+}
+
+const remove = (id) => {
+  return new Promise((resolve, reject) => {
+    users = users.filter(u => u.id !== id);
+    resolve();
+  });
+}
+
 export {
   findAll,
   findById,
   create,
+  update,
+  remove,
 }
