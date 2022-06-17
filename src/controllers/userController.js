@@ -9,7 +9,8 @@ const getUsers = async (req, res) => {
     res.writeHead(200, {"Content-Type": "application/json"});
     res.end(JSON.stringify(users));
   } catch (error) {
-    console.log(error);
+    res.writeHead(500, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({message: 'There is an error on server side'}));
   }
 }
 
@@ -36,7 +37,8 @@ const getUser = async (req, res, id) => {
 
     }
   } catch (error) {
-    console.log(error);
+    res.writeHead(500, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({message: 'There is an error on server side'}));
   }
 }
 
@@ -71,7 +73,8 @@ const createUser = async (req, res) => {
     return res.end(JSON.stringify(newUser));
 
   } catch (error) {
-    console.log(error);
+    res.writeHead(500, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({message: 'There is an error on server side'}));
   }
 }
 
@@ -103,7 +106,8 @@ const updateUser = async (req, res, id) => {
     }
     
   } catch (error) {
-    console.log(error);
+    res.writeHead(500, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({message: 'There is an error on server side'}));
   }
 }
 
@@ -112,17 +116,21 @@ const updateUser = async (req, res, id) => {
 const deleteUser = async (req, res, id) => {
   try {
     const user = await User.findById(id);
-    console.log(id);
-    if(user) {
-        await User.remove(id);
-        res.writeHead(200, {"Content-Type": "application/json"});
-        res.end(JSON.stringify({message: `User ${id} removed`}));
+
+    if(user && isValidId(id)) {
+      await User.remove(id);
+      res.writeHead(204, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({message: `User ${id} removed`}));
+    } else if (user && !isValidId(id)) {
+      res.writeHead(400, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({ message: 'User ID is invalid (not uuid)' }));
     } else {
       res.writeHead(404, {"Content-Type": "application/json"});
       res.end(JSON.stringify({message: 'User does not exist'}));
     }
   } catch (error) {
-    console.log(error);
+    res.writeHead(500, {"Content-Type": "application/json"});
+    res.end(JSON.stringify({message: 'There is an error on server side'}));
   }
 }
 
