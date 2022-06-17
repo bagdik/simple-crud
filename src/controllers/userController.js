@@ -1,5 +1,5 @@
 import * as User from '../models/userModel.js';
-import { getPostData } from '../utils.js';
+import { getPostData, isValidId } from '../utils.js';
 
 // @desc Gets All Users
 // @route GET /api/users
@@ -18,13 +18,22 @@ const getUsers = async (req, res) => {
 const getUser = async (req, res, id) => {
   try {
     const user = await User.findById(id);
-    console.log(id);
-    if(user) {
-        res.writeHead(200, {"Content-Type": "application/json"});
-        res.end(JSON.stringify(user));
+    
+    if (user && isValidId(id)) {
+
+      res.writeHead(200, {"Content-Type": "application/json"});
+      res.end(JSON.stringify(user));
+
+    } else if(user && !isValidId(id)) {
+
+      res.writeHead(400, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({ message: 'User ID is invalid (not uuid)' }));
+
     } else {
+
       res.writeHead(404, {"Content-Type": "application/json"});
       res.end(JSON.stringify({message: 'User does not exist'}));
+
     }
   } catch (error) {
     console.log(error);
@@ -35,15 +44,27 @@ const getUser = async (req, res, id) => {
 // @route POST /api/users
 const createUser = async (req, res) => {
   try {
-    const body = await getPostData(req);
+    const body = JSON.parse(await getPostData(req));
 
-    const { name, age, hobby } = JSON.parse(body);
+    if (
+      !body.hasOwnProperty('name') || 
+      !body.hasOwnProperty('age') || 
+      !body.hasOwnProperty('hobbies')) {
+
+        res.writeHead(400, {"Content-Type": "application/json"});
+        return res.end(
+        JSON.stringify({message: 'Name, age, hobbies are required fields'})
+      
+      );
+    }
+
+    const { name, age, hobbies } = body;
 
     const user = {
       name,
       age,
-      hobby, 
-    }
+      hobbies, 
+    } 
 
     const newUser = await User.create(user);
     res.writeHead(201, {"Content-Type": "application/json"});
@@ -59,19 +80,23 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res, id) => {
   try {
     const user = await User.findById(id);
-    if (user) {
+
+    if (user && isValidId(id)) {
       const body = await getPostData(req);  
-      const { name, age, hobby } = JSON.parse(body);
+      const { name, age, hobbies } = JSON.parse(body);
   
       const userData = {
         name: name || user.name,
         age: age || user.age,
-        hobby: hobby || user.hobby, 
+        hobbies: hobbies || user.hobbies, 
       }
   
       const updatedUser = await User.update(id, userData);
       res.writeHead(200, {"Content-Type": "application/json"});
       return res.end(JSON.stringify(updatedUser));
+    } else if (user && !isValidId(id)) {
+      res.writeHead(400, {"Content-Type": "application/json"});
+      res.end(JSON.stringify({ message: 'User ID is invalid (not uuid)' }));
     } else {
       res.writeHead(404, {"Content-Type": "application/json"});
       res.end(JSON.stringify({message: 'User does not exist'}));

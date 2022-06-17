@@ -17,6 +17,7 @@ const server = http.createServer((req, res) => {
     getUsers(req, res);
   } else if (req.url.match(/\/api\/users\/([0-9]+)/) && req.method === 'GET') {
     const id = parseId(req.url);
+
     getUser(req, res, id);
   } else if (req.url === '/api/users' && req.method === 'POST') {
     createUser(req, res);
