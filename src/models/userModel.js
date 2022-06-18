@@ -12,7 +12,6 @@ const findAll = () => {
 const findById = (id) => {
   return new Promise((resolve, reject) => {
     const user = users.find(u => u.id === id);
-    console.log(users, id);
     resolve(user);
   });
 }
